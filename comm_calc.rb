@@ -1,9 +1,43 @@
 #!/usr/bin/env ruby
 
-# version 0.1.1
+# version 0.1.2
 
 require 'green_shoes'
 require 'ordinalize_full/integer'
+require 'open-uri'
+
+$current_version = [0,1,2]
+
+# storing current version as a string too.
+$curr_str = String.new
+$current_version.each {|n| $curr_str << "#{n}."}
+$curr_str = $curr_str[0...($curr_str.length-1)]
+
+class Update
+  # check the latest version on github
+  def latest_version?(get=false)
+    lines = open('https://raw.githubusercontent.com/holaymolay/comm_calc/master/comm_calc.rb') {|f| f.read }
+    File.open("latest", 'w') { |file| file.write(lines) } if get
+    new_ver = lines.split("\n")[2].delete("#version ").split(".").map(&:to_i)
+    return new_ver
+  end
+
+  # is a new version available? returns true or false
+  def available?
+    latest = self.latest_version?
+    curr = $current_version
+    (0..2).each {|n| if curr[n] < latest[n] then return true end }
+    return false
+  end
+
+  def does_updater_exist?
+    if !File.exist?('updater.rb')
+      file = open('https://raw.githubusercontent.com/holaymolay/comm_calc/master/updater.rb') {|f| f.read }
+      File.open("updater.rb", 'w') { |file| file.write(lines) }
+    end
+  end
+
+end
 
 class Calc
   def base(amount)
@@ -45,7 +79,7 @@ class Verify
   end
 
   # Negative numbers are never needed when calculating commissions.
-  # This method will convert any negative number to a positive
+  # This method will convert any negative float to a positive
   def not_negative(num)
     if num < 0
       return (num * -1.0)
@@ -54,6 +88,8 @@ class Verify
     end
   end
 end
+
+Update.new.does_updater_exist?
 
 Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
 
@@ -67,7 +103,6 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
       stack :width => '85%', :height => '100%' do
         flow :width => '100%', :height => 60  do
           # input fields go here
-          #border gray, strokewidth: 1
           stack :width => 113, :height => 60 do
             border gray, strokewidth: 0.5
             flow :width => 113, :height => 27 do
@@ -136,7 +171,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
         end
 
         flow :width => '100%', :height => 345 do
-          #text output goes here
+          #text output happens here
           @show = edit_box("", width: '99.8%', height: '100%')
         end
       end
@@ -147,7 +182,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
             verify = Verify.new
             @prev_str ||= ""
 
-            # Here are the various values defined by the user.
+            # User defined values.
             deal_num =  verify.deal(@deal.text)
             six_mo = verify.not_negative(@six_totals.text.to_f)
             twelve_mo = verify.not_negative(@twelve_totals.text.to_f)
@@ -155,7 +190,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
             sales_prev = verify.not_negative(@already_on_store.text.to_f)
             as_comm = verify.not_negative(@a_s_comm.text.to_f)
 
-            # Calculating some values...
+            # Calculated values.
             comm_prev = Calc.new.base(sales_prev)
             sales_new = six_mo + (twelve_mo /2)
             comm_new = Calc.new.base(sales_new + sales_prev) - comm_prev
@@ -164,7 +199,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
             penalty_6mo = six_mo * -0.01
             total_comm = comm_new + bonus_opt14 + bonus_annual + penalty_6mo - as_comm
 
-            # Lambda that formats a float to two decimal places ($ USD)
+            # Lambda that formats a float to two decimal places ($USD)
             money = lambda {|num| format('%.2f', num)}
 
             # Building string for output...
@@ -186,7 +221,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
             -----------------------------------------------------
             )
 
-            # Outputting to edit_box...
+            # Outputting string to edit_box...
             @show.text = my_str + @prev_str
 
             @prev_str = my_str + @prev_str
@@ -204,7 +239,7 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
             @opt14.text = ""
             @a_s_comm.text = ""
             @prev_str = ""
-            $deal_iterator = 0 #I'm not sure if the user would want to reset the deal iterator
+            $deal_iterator = 0 #I'm not sure if the user would want to reset the iterator, but it will remain this way unless I get a request to change it.
           }
           @clear.style(:width => 100, :height => 35)
 
@@ -232,13 +267,24 @@ Shoes.app :title => "", :width => 800, :height => 460, :resizable => false do
           @about = para link('About') {
             Shoes.app :title => "About", :width => 325, :height => 325, :resizable => false, :margin_top => 20 do
               background whitesmoke
-
+              @updater = Proc.new {
+                if confirm("Confirm Update")
+                  Update.new.latest_version?(true)
+                  exec 'ruby updater.rb'
+                  exit()
+                end
+              }
               stack :align => 'center', :margin_top => 10 do
                 para code('Commission Calculator'), :stroke => red, :align => 'center', :weight => 'bold', :size => 'large'
-                inscription 'Version 0.1.0', :align => 'center'
-                para ""
+                inscription 'Version ' + $curr_str, :align => 'center'
+                if Update.new.available?
+                  inscription link('Get the latest version!') {@updater.call}, :align => 'center'
+                else
+                  para ""
+                end
                 para strong('Created by:'), ' Brian Jason', :align => 'center'
                 inscription strong('Email:'), ' brianjason@gmail.com', :align => 'center'
+
                 para ""
 
                 inscription "Copyright 2015. Licensed under a Creative Commons Attribution-NoDerivatives 4.0 International License.", :align => 'center', :size => 'small'

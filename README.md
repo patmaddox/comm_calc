@@ -1,6 +1,6 @@
 Commission Calculator
 =====================
-version 0.1.1
+version 0.1.2
 
 A tool to help with sales commission calcuations.
 
@@ -19,3 +19,8 @@ Screenshot
 Tested On:
 -------------
 - Linux (Ubuntu)
+
+Added Features
+--------------
+- Checks for newer version
+- Applies update via updater.rb if newer version exists
