@@ -1,13 +1,13 @@
 Commission Calculator
 =====================
-### Version 0.1.1
+version 0.1.1
 
 A tool to help with sales commission calcuations.
 
 
 Dependencies
 ------------
-#### [Green Shoes](https://github.com/ashbb/green_shoes) is a Ruby domain specific language for beautiful Desktop Applications.
+[Green Shoes](https://github.com/ashbb/green_shoes) is a Ruby domain specific language for beautiful Desktop Applications.
 
     gem install green_shoes
 
