@@ -19,6 +19,8 @@ Screenshot
 Tested On:
 -------------
 - Linux (Ubuntu)
+- Not working on Windows yet, but it will after the next update.
+- Untested on OSX. Sorry, I don't own a Mac, but if you do and are willing to help me test it, I'd be much abliged.
 
 Added Features
 --------------
