@@ -16,7 +16,7 @@ Screenshot:
 ----------
 ![Commission Calculator Screenshot] (https://github.com/holaymolay/comm_calc/blob/master/images/screenshot.png)
 
-Tested On:
+Compatibility:
 -------------
 - Linux (Ubuntu)
 - Not working on Windows yet, but it will after the next update.
