@@ -11,6 +11,13 @@ Dependencies:
 
     gem install green_shoes
 
+[OrdinalizeFull](https://github.com/infertux/ordinalize_full) turns a number into an ordinal string such as first, second, third or 1st, 2nd, 3rd
+
+    gem install ordinalize_full
+
+or install all dependencies with bundler
+
+    bundle install
 
 Screenshot:
 ----------
